@@ -1,9 +1,8 @@
 import argparse
 import mailbox
 import queue
-import threading
-
 import sys
+import threading
 from email.header import Header, decode_header
 
 from pymongo import MongoClient
@@ -34,20 +33,26 @@ def walk_payload(message):
     return result
 
 
+def process_header(header):
+    val = []
+    if type(header) == Header:
+        for code, encoding in decode_header(header):  # it may be many values
+            if encoding in (None, "unknown-8bit"):
+                val.append(code)
+            else:
+                val.append(code.decode(encoding))
+    else:
+        val = header
+    return val
+
+
 def process_mbox(mbox, que):
     for message in mbox:
         print("processing message {}".format(message["Message-ID"]))  # some kind of logging
-        db_record = {"headers": {}, "body": None}
-
-        # get message headers
-        for key, value in message.items():
-            if type(value) == Header:
-                value = [item[0].decode(item[1] or 'utf-8') for item in decode_header(value)]  # it may be many values
-
-            db_record["headers"][key] = value
-
-        # get body
-        db_record["body"] = walk_payload(message)
+        db_record = {
+            "headers": {key: process_header(value) for key, value in message.items()},  # get message headers
+            "body": walk_payload(message)  # get body
+        }
 
         que.put(db_record)
 
