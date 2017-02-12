@@ -4,6 +4,8 @@ import queue
 import threading
 
 import sys
+from email.header import Header, decode_header
+
 from pymongo import MongoClient
 
 
@@ -39,6 +41,9 @@ def process_mbox(mbox, que):
 
         # get message headers
         for key, value in message.items():
+            if type(value) == Header:
+                value = [item[0].decode(item[1] or 'utf-8') for item in decode_header(value)]  # it may be many values
+
             db_record["headers"][key] = value
 
         # get body
