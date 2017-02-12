@@ -10,19 +10,13 @@ from pymongo import MongoClient
 
 def worker(mongo_collection, que):
     while True:
-        message = que.get()
-        if message is None:  # stop worker if got None
+        item = que.get()
+        if item is None:  # stop worker if got None
             break
-
-        db_record = {
-            "headers": {key: process_header(value) for key, value in message.items()},  # get message headers
-            "body": walk_payload(message)  # get body
-        }
-
         try:
-            mongo_collection.insert_one(db_record)
+            mongo_collection.insert_one(item)
         except Exception as ex:
-            sys.stderr.write("issue '%s' happened inserting: %s as record %s\n" % (ex, message, db_record))
+            sys.stderr.write("exception '%s' happened on writing to db item: %s\n" % (ex, item))
         finally:
             que.task_done()
 
@@ -55,7 +49,12 @@ def process_header(header):
 def process_mbox(mbox, que):
     for message in mbox:
         print("processing message {}".format(message["Message-ID"]))  # some kind of logging
-        que.put(message)
+        db_record = {
+            "headers": {key: process_header(value) for key, value in message.items()},  # get message headers
+            "body": walk_payload(message)  # get body
+        }
+
+        que.put(db_record)
 
 
 def main(mbox_path, mongo_url, db_name, db_collection, num_worker_threads):
