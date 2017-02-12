@@ -67,9 +67,11 @@ def main(mbox_path, mongo_url, db_name, db_collection, num_worker_threads):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(prog='mbox2mongo',
-                                     description='Read mailbox, write data into mongo db.',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        prog='mbox2mongo',
+        description='Read mailbox, write data into mongo db.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument("mbox_path", help="path to mailbox file")
     parser.add_argument("mongo_url", help="mongodb url")
     parser.add_argument("--mongo_db", "-d", help="mongo database name", default="archive")
