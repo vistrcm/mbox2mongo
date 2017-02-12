@@ -40,8 +40,6 @@ def process_mbox(mbox, que):
         db_record["body"] = get_payload(message)
 
         que.put(db_record)
-    # block until all tasks are done
-    que.join()
 
 
 def main(mbox_path, mongo_url, db_name, db_collection, num_worker_threads):
@@ -57,6 +55,9 @@ def main(mbox_path, mongo_url, db_name, db_collection, num_worker_threads):
         threads.append(t)
 
     process_mbox(mbox, que)
+
+    # block until all tasks are done
+    que.join()
 
     # stop workers
     for i in range(num_worker_threads):
