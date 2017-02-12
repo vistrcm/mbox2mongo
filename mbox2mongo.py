@@ -15,7 +15,7 @@ def worker(mongo_collection, que):
         try:
             mongo_collection.insert_one(item)
         except Exception as ex:
-            sys.stderr.write("exception %s happened on writing to db item: %s\n" % (ex, item))
+            sys.stderr.write("exception '%s' happened on writing to db item: %s\n" % (ex, item))
         finally:
             que.task_done()
 
