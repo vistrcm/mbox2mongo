@@ -6,18 +6,6 @@ import threading
 from pymongo import MongoClient
 
 
-def get_payload(msg):
-    result = ""
-    payload = msg.get_payload()
-    if msg.is_multipart():
-        div = '\n'
-        for subMsg in payload:
-            result = result + get_payload(subMsg) + div
-    else:
-        result = payload
-    return result
-
-
 def worker(mongo_collection, que):
     while True:
         item = que.get()
@@ -25,6 +13,18 @@ def worker(mongo_collection, que):
             break
         mongo_collection.insert_one(item)
         que.task_done()
+
+
+def walk_payload(message):
+    result = ""
+    div = "\n"
+    for part in message.walk():
+        maintype, _ = part.get_content_type().split('/')
+        if maintype != 'text':
+            result = result + "<looks like attachment>" + div
+        else:
+            result = result + part.get_payload() + div
+    return result
 
 
 def process_mbox(mbox, que):
@@ -37,7 +37,7 @@ def process_mbox(mbox, que):
             db_record["headers"][key] = value
 
         # get body
-        db_record["body"] = get_payload(message)
+        db_record["body"] = walk_payload(message)
 
         que.put(db_record)
 
