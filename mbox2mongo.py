@@ -1,9 +1,9 @@
 import argparse
 import mailbox
+import queue
 import sys
+import threading
 from email.header import Header, decode_header
-from multiprocessing import JoinableQueue
-from multiprocessing import Process
 
 from pymongo import MongoClient
 
@@ -61,18 +61,17 @@ def process_mbox(mbox, que):
 def main(mbox_path, mongo_url, db_name, db_collection, num_worker_threads):
     mbox = mailbox.mbox(mbox_path)
 
-    que = JoinableQueue()
-    processes = []
+    que = queue.Queue()
+    threads = []
     for i in range(num_worker_threads):
         # create separate mongo clients for each worker
-        mongo_client = MongoClient(mongo_url, connect=False)  # do not connect immediately connect on forked process
+        mongo_client = MongoClient(mongo_url)
         collection = mongo_client[db_name][db_collection]
 
-        p = Process(target=worker, args=(collection, que))
-        p.start()
-        processes.append(p)
+        t = threading.Thread(target=worker, args=(collection, que))
+        t.start()
+        threads.append(t)
 
-    # noinspection PyTypeChecker
     process_mbox(mbox, que)
 
     # block until all tasks are done
@@ -81,8 +80,8 @@ def main(mbox_path, mongo_url, db_name, db_collection, num_worker_threads):
     # stop workers
     for i in range(num_worker_threads):
         que.put(None)
-    for p in processes:
-        p.join()
+    for t in threads:
+        t.join()
 
 
 def parse_args():
