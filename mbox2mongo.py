@@ -76,7 +76,7 @@ def parse_args():
     parser.add_argument("mongo_url", help="mongodb url")
     parser.add_argument("--mongo_db", "-d", help="mongo database name", default="archive")
     parser.add_argument("--mongo_collection", "-c", help="mongo collection name", default="mails")
-    parser.add_argument("--workers", "-w", help="number of workers", default=3)
+    parser.add_argument("--workers", "-w", help="number of workers", default=3, type=int)
     return parser.parse_args()
 
 
