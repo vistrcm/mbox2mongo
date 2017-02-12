@@ -44,12 +44,14 @@ def process_mbox(mbox, que):
 
 def main(mbox_path, mongo_url, db_name, db_collection, num_worker_threads):
     mbox = mailbox.mbox(mbox_path)
-    mongo_client = MongoClient(mongo_url)
-    collection = mongo_client[db_name][db_collection]
 
     que = queue.Queue()
     threads = []
     for i in range(num_worker_threads):
+        # create separate mongo clients for each worker
+        mongo_client = MongoClient(mongo_url)
+        collection = mongo_client[db_name][db_collection]
+
         t = threading.Thread(target=worker, args=(collection, que))
         t.start()
         threads.append(t)
