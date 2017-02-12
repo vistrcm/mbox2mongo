@@ -29,6 +29,7 @@ def worker(mongo_collection, que):
 
 def process_mbox(mbox, que):
     for message in mbox:
+        print("processing message {}".format(message["Message-ID"]))  # some kind of logging
         db_record = {"headers": {}, "body": None}
 
         # get message headers
