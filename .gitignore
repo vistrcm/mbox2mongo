@@ -1,3 +1,5 @@
 .idea/
 mbox2mongo.iml
 test.mbox
+venv/
+mongodb_data/
