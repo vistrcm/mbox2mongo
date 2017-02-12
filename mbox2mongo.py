@@ -3,16 +3,21 @@ import mailbox
 import queue
 import threading
 
+import sys
 from pymongo import MongoClient
 
 
 def worker(mongo_collection, que):
     while True:
         item = que.get()
-        if item is None:
+        if item is None:  # stop worker if got None
             break
-        mongo_collection.insert_one(item)
-        que.task_done()
+        try:
+            mongo_collection.insert_one(item)
+        except Exception as ex:
+            sys.stderr.write("exception on writing to db item: %s", item)
+        finally:
+            que.task_done()
 
 
 def walk_payload(message):
