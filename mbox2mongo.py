@@ -29,7 +29,7 @@ def walk_payload(message):
         if maintype != 'text':
             result += div  # skip data with non 'text/*' context type
         else:
-            result = result + part.get_payload() + div
+            result = result + part.get_payload(decode=True) + div
     return result
 
 
