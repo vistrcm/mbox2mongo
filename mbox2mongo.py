@@ -27,7 +27,7 @@ def walk_payload(message):
     for part in message.walk():
         maintype, _ = part.get_content_type().split('/')
         if maintype != 'text':
-            result = result + "<looks like attachment>" + div
+            result += div  # skip data with non 'text/*' context type
         else:
             result = result + part.get_payload() + div
     return result
