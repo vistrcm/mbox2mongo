@@ -71,16 +71,16 @@ def main(mbox_path, mongo_url, db_name, db_collection, num_worker_threads):
         t.start()
         threads.append(t)
 
-    process_mbox(mbox, que)
-
-    # block until all tasks are done
-    que.join()
-
-    # stop workers
-    for i in range(num_worker_threads):
-        que.put(None)
-    for t in threads:
-        t.join()
+    try:
+        process_mbox(mbox, que)
+        # block until all tasks are done
+        que.join()
+    finally:
+        # stop workers even if exceptions occures
+        for i in range(num_worker_threads):
+            que.put(None)
+        for t in threads:
+            t.join()
 
 
 def parse_args():
