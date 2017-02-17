@@ -29,7 +29,7 @@ def walk_payload(message):
         for part in message.walk():
             maintype, _ = part.get_content_type().split('/')
             if maintype == 'text':  # skip data with non 'text/*' context type
-                charset = part.get_content_charset()
+                charset = part.get_content_charset('ascii')
                 part_payload = part.get_payload(decode=True)
 
                 try:
