@@ -22,15 +22,25 @@ def worker(mongo_collection, que):
 
 
 def walk_payload(message):
-    result = ""
     div = "\n"
-    for part in message.walk():
-        maintype, _ = part.get_content_type().split('/')
-        if maintype != 'text':
-            result += div  # skip data with non 'text/*' context type
-        else:
-            result = result + part.get_payload(decode=True) + div
-    return result
+
+    if message.is_multipart():
+        parts = []
+        for part in message.walk():
+            maintype, _ = part.get_content_type().split('/')
+            if maintype == 'text':  # skip data with non 'text/*' context type
+                charset = part.get_content_charset()
+                part_payload = part.get_payload(decode=True)
+
+                try:
+                    payload_str = part_payload.decode(charset)
+                except UnicodeDecodeError:  # Guess: try to decode using 'utf-8' if charset does not work
+                    payload_str = part_payload.decode('utf-8')
+
+                parts.append(payload_str)
+        return div.join(parts)
+    else:
+        return message.get_payload(decode=True).decode(message.get_content_charset())
 
 
 def process_header(header):
