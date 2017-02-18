@@ -40,7 +40,7 @@ def walk_payload(message):
                 parts.append(payload_str)
         return div.join(parts)
     else:
-        return message.get_payload(decode=True).decode(message.get_content_charset())
+        return message.get_payload(decode=True).decode(message.get_content_charset('ascii'))
 
 
 def process_header(header):
