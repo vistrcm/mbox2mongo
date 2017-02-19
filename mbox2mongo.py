@@ -29,18 +29,21 @@ def walk_payload(message):
         for part in message.walk():
             maintype, _ = part.get_content_type().split('/')
             if maintype == 'text':  # skip data with non 'text/*' context type
-                charset = part.get_content_charset('ascii')
-                part_payload = part.get_payload(decode=True)
-
-                try:
-                    payload_str = part_payload.decode(charset)
-                except UnicodeDecodeError:  # Guess: try to decode using 'utf-8' if charset does not work
-                    payload_str = part_payload.decode('utf-8')
-
+                payload_str = try_decode(part)
                 parts.append(payload_str)
         return div.join(parts)
     else:
-        return message.get_payload(decode=True).decode(message.get_content_charset())
+        return try_decode(message)
+
+
+def try_decode(msg):
+    charset = msg.get_content_charset('ascii')  # use ascii as failobj by default.
+    part_payload = msg.get_payload(decode=True)
+    try:
+        payload_str = part_payload.decode(charset)
+    except UnicodeDecodeError:  # Guess: try to decode using 'utf-8' if charset does not work
+        payload_str = part_payload.decode('utf-8')
+    return payload_str
 
 
 def process_header(header):
