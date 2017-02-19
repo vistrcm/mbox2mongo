@@ -42,7 +42,8 @@ def try_decode(msg):
     try:
         payload_str = part_payload.decode(charset)
     except UnicodeDecodeError:  # Guess: try to decode using 'utf-8' if charset does not work
-        payload_str = part_payload.decode('utf-8')
+        # try to decode with 'replace' error handling scheme. Most probably loose some data
+        payload_str = part_payload.decode('utf-8', 'replace')
     return payload_str
 
 
