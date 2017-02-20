@@ -51,7 +51,7 @@ def process_records(url, db, collection):
 
     ids = []
 
-    for i in col.find({}, projection={'_id': True}).limit(1000):
+    for i in col.find({}, projection={'_id': True}):
         ids.append(i["_id"])
 
     task_queue = Queue()
