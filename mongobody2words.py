@@ -47,26 +47,24 @@ def worker(url, db, collection, task_queue, done_queue):
 
 
 def process_records(url, db, collection):
-    col = MongoClient(url, connect=False)[db][collection]
-
-    ids = []
-
-    for i in col.find({}, projection={'_id': True}):
-        ids.append(i["_id"])
+    col = MongoClient(url)[db][collection]
+    cursor = col.find({}, projection={'_id': True})
 
     task_queue = Queue()
     done_queue = Queue()
-    # Submit tasks
-    for task in ids:
-        task_queue.put(task)
 
     # Start worker processes
     for i in range(cpu_count()):
         Process(target=worker, args=(url, db, collection, task_queue, done_queue)).start()
 
+    # Submit tasks
+    num_ids = 0
+    for task in cursor:
+        task_queue.put(task["_id"])
+        num_ids += 1
+
     # Get and print results
-    print('Unordered results:')
-    for _ in range(len(ids)):
+    for _ in range(num_ids):
         for item in done_queue.get():
             print(item)
 
