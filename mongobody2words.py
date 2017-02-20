@@ -3,9 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
-import base64
-import binascii
-import quopri
+import multiprocessing as mp
 import string
 
 import html2text
@@ -49,8 +47,60 @@ def process_records(url, db, collection):
         for word in processed_text.split():
             print(word)
 
+
+def print_worker(print_q):
+    while True:
+        item = print_q.get()
+        if item is None:
+            break
+        print(item)
+        print_q.task_done()
+
+
+def worker(process_que, print_q):
+    while True:
+        item = process_que.get()
+        if item is None:
+            break
+        processed_text = process_body(item)
+        for w in processed_text.split():
+            print_q.put(w)
+        process_que.task_done()
+
+
+def process_records(url, db, collection, num_workers=mp.cpu_count()):
+    col = MongoClient(url)[db][collection]
+    work_queue = mp.JoinableQueue()
+    print_queue = mp.JoinableQueue()
+
+    processes = []
+    # print worker
+    print_process = mp.Process(target=print_worker, args=(print_queue,))
+    print_process.start()
+
+    # data workers
+    for i in range(num_workers):
+        p = mp.Process(target=worker, args=(work_queue, print_queue))
+        p.start()
+        processes.append(p)
+
+    for doc in col.find():
+        work_queue.put(doc["body"])
+
+    # block until all tasks are done
+    work_queue.join()
+    print_queue.join()
+
+    # stop workers
+    print_queue.put(None)
+    print_process.join()
+
+    for i in range(num_workers):
+        work_queue.put(None)
+    for p in processes:
+        p.join()
+
+
 if __name__ == '__main__':
     args = parse_args()
     process_records(args.mongo_url, args.mongo_db, args.mongo_collection)
-
-
