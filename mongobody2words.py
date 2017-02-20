@@ -4,8 +4,6 @@ from __future__ import print_function
 
 import argparse
 import string
-from multiprocessing import Pool
-from multiprocessing import cpu_count
 
 import html2text
 from pymongo import MongoClient
@@ -41,15 +39,15 @@ def worker(item):
     return processed_text.split()
 
 
-def process_records(url, db, collection, num_workers=cpu_count()):
+def process_records(url, db, collection):
     col = MongoClient(url)[db][collection]
 
-    items = col.find({}, projection={'_id': True, "body": True})
-    with Pool(processes=num_workers) as pool:
-        results = pool.map(worker, items)
-    for item in results:
-        for subi in item:
-            print(subi)
+    items = col.find()
+    for item in items:
+        processed_text = process_body(item["body"])
+        for word in processed_text.split():
+            print(word)
+
 
 if __name__ == '__main__':
     args = parse_args()
