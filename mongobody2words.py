@@ -42,8 +42,13 @@ def worker(url, db, collection, task_queue, done_queue):
     for item_id in iter(task_queue.get, 'STOP'):
         item = worker_col.find_one({"_id": item_id})
         processed_text = process_body(item["body"])
-        result = processed_text.split()
-        done_queue.put(result)
+        for word in processed_text.split():
+            done_queue.put(word)
+
+
+def print_worker(done_queue):
+    for item in iter(done_queue.get, 'STOP_PRINTING'):
+        print(item)
 
 
 def process_records(url, db, collection):
@@ -51,11 +56,18 @@ def process_records(url, db, collection):
     cursor = col.find({}, projection={'_id': True})
 
     task_queue = Queue()
-    done_queue = Queue()
+    print_queue = Queue()
+
+    # Print worker
+    print_process = Process(target=print_worker, args=(print_queue,))
+    print_process.start()
 
     # Start worker processes
+    worker_processes = []
     for i in range(cpu_count()):
-        Process(target=worker, args=(url, db, collection, task_queue, done_queue)).start()
+        p = Process(target=worker, args=(url, db, collection, task_queue, print_queue))
+        p.start()
+        worker_processes.append(p)
 
     # Submit tasks
     num_ids = 0
@@ -63,14 +75,15 @@ def process_records(url, db, collection):
         task_queue.put(task["_id"])
         num_ids += 1
 
-    # Get and print results
-    for _ in range(num_ids):
-        for item in done_queue.get():
-            print(item)
-
     # Tell child processes to stop
     for i in range(cpu_count()):
         task_queue.put('STOP')
+
+    for p in worker_processes:
+        p.join()
+
+    print_queue.put('STOP_PRINTING')
+    print_process.join()
 
 
 if __name__ == '__main__':
