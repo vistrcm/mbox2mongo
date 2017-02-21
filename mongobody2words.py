@@ -55,7 +55,10 @@ def worker(url, db, collection, task_queue, done_queue):
 
 def print_worker(done_queue):
     for item in iter(done_queue.get, 'STOP_PRINTING'):
-        print(item)
+        try:
+            print(item)
+        except UnicodeEncodeError:  # just ignore UnicodeEncodeError
+            pass
 
 
 def process_records(url, db, collection):
