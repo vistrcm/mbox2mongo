@@ -37,12 +37,12 @@ def process_body(body):
     # lower
     text = body.lower()
 
-    # remove punctuation
-    table = str.maketrans('', '', string.punctuation)
-    text = text.translate(table)
+    # # remove punctuation
+    # table = str.maketrans('', '', string.punctuation)
+    # text = text.translate(table)
 
     # leave only printable symbols
-    text = remove_unprintable(text)
+    # text = remove_unprintable(text)
 
     plain = html2text.html2text(text)  # convert bytes to string
     return plain
