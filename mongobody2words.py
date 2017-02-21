@@ -52,13 +52,13 @@ def process_body(body):
     return plain
 
 
-def clean_symbols(s, exclude_unicode_set=None):
+def clean_symbols(text, exclude_unicode_set=None):
     """
     Clean some symbols.
 
     Clean some non-important symbols.
     See http://www.unicode.org/reports/tr44/#General_Category_Values for unicode categories
-    :param s:
+    :param text: text to filter
     :param exclude_unicode_set:
     :return:
     """
@@ -66,7 +66,11 @@ def clean_symbols(s, exclude_unicode_set=None):
         exclude_unicode_set = set(
             'C'  # Other:	Cc | Cf | Cs | Co | Cn
         )
-    return ''.join(c for c in s if unicodedata.category(c) not in exclude_unicode_set)
+
+    all_chars = set(chr(i) for i in range(sys.maxunicode))
+    exclude_chars = set(c for c in all_chars if unicodedata.category(c) in exclude_unicode_set)
+    translate_table = {ord(character): None for character in exclude_chars}
+    return text.translate(translate_table)
 
 
 def remove_unprintable(input_body):
