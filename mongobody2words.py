@@ -3,13 +3,22 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
+import logging
 import string
+import sys
 from multiprocessing import Process
 from multiprocessing import Queue
 from multiprocessing import cpu_count
 
 import html2text
 from pymongo import MongoClient
+
+logger = logging.getLogger("body2words")
+logger.setLevel(logging.DEBUG)
+
+ch = logging.StreamHandler(sys.stderr)
+ch.setLevel(logging.DEBUG)
+logger.addHandler(ch)
 
 
 def parse_args():
@@ -57,7 +66,8 @@ def print_worker(done_queue):
     for item in iter(done_queue.get, 'STOP_PRINTING'):
         try:
             print(item)
-        except UnicodeEncodeError:  # just ignore UnicodeEncodeError
+        except UnicodeEncodeError as ex:  # just ignore UnicodeEncodeError
+            logger.warning("UnicodeEncodeError happened on record %s. Ignore. Ex: %s", item, ex)
             pass
 
 
@@ -86,13 +96,17 @@ def process_records(url, db, collection):
         num_ids += 1
 
     # Tell child processes to stop
+    logger.info("stopping workers via 'STOP' in queue")
     for i in range(cpu_count()):
         task_queue.put('STOP')
 
+    logger.info("joining workers")
     for p in worker_processes:
         p.join()
 
+    logger.info("stopping printer via 'STOP' in queue")
     print_queue.put('STOP_PRINTING')
+    logger.info("joining printer")
     print_process.join()
 
 
