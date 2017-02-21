@@ -11,6 +11,7 @@ from multiprocessing import Queue
 from multiprocessing import cpu_count
 
 import html2text
+import unicodedata
 from pymongo import MongoClient
 
 logger = logging.getLogger("body2words")
@@ -44,8 +45,28 @@ def process_body(body):
     # leave only printable symbols
     # text = remove_unprintable(text)
 
-    plain = html2text.html2text(text)  # convert bytes to string
+    # clean some symbols. for example control
+    text = clean_symbols(text)
+
+    plain = html2text.html2text(text)
     return plain
+
+
+def clean_symbols(s, exclude_unicode_set=None):
+    """
+    Clean some symbols.
+
+    Clean some non-important symbols.
+    See http://www.unicode.org/reports/tr44/#General_Category_Values for unicode categories
+    :param s:
+    :param exclude_unicode_set:
+    :return:
+    """
+    if not exclude_unicode_set:
+        exclude_unicode_set = set(
+            'C'  # Other:	Cc | Cf | Cs | Co | Cn
+        )
+    return ''.join(c for c in s if unicodedata.category(c) not in exclude_unicode_set)
 
 
 def remove_unprintable(input_body):
