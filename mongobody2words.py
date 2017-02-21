@@ -22,6 +22,17 @@ ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
 
+# Prepare translation table to clean some non-important symbols.
+# See http://www.unicode.org/reports/tr44/#General_Category_Values for unicode categories
+exclude_unicode_set = set(
+    'C'  # Other:	Cc | Cf | Cs | Co | Cn
+)
+
+all_chars = set(chr(i) for i in range(sys.maxunicode))
+exclude_chars = set(c for c in all_chars if unicodedata.category(c) in exclude_unicode_set)
+translate_table = {ord(character): None for character in exclude_chars}
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         prog='cleanupbody',
@@ -46,31 +57,11 @@ def process_body(body):
     # text = remove_unprintable(text)
 
     # clean some symbols. for example control
-    text = clean_symbols(text)
+    text = text.translate(translate_table)
 
     plain = html2text.html2text(text)
     return plain
 
-
-def clean_symbols(text, exclude_unicode_set=None):
-    """
-    Clean some symbols.
-
-    Clean some non-important symbols.
-    See http://www.unicode.org/reports/tr44/#General_Category_Values for unicode categories
-    :param text: text to filter
-    :param exclude_unicode_set:
-    :return:
-    """
-    if not exclude_unicode_set:
-        exclude_unicode_set = set(
-            'C'  # Other:	Cc | Cf | Cs | Co | Cn
-        )
-
-    all_chars = set(chr(i) for i in range(sys.maxunicode))
-    exclude_chars = set(c for c in all_chars if unicodedata.category(c) in exclude_unicode_set)
-    translate_table = {ord(character): None for character in exclude_chars}
-    return text.translate(translate_table)
 
 
 def remove_unprintable(input_body):
