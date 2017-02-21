@@ -6,12 +6,12 @@ import argparse
 import logging
 import string
 import sys
+import unicodedata
 from multiprocessing import Process
 from multiprocessing import Queue
 from multiprocessing import cpu_count
 
 import html2text
-import unicodedata
 from pymongo import MongoClient
 
 logger = logging.getLogger("body2words")
@@ -20,7 +20,6 @@ logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler(sys.stderr)
 ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
-
 
 # Prepare translation table to clean some non-important symbols.
 # See http://www.unicode.org/reports/tr44/#General_Category_Values for unicode categories
@@ -61,7 +60,6 @@ def process_body(body):
 
     plain = html2text.html2text(text)
     return plain
-
 
 
 def remove_unprintable(input_body):
