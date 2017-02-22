@@ -46,6 +46,7 @@ def parse_args():
     parser.add_argument("mongo_url", help="mongodb url")
     parser.add_argument("--mongo_db", "-d", help="mongo database name", default="archive")
     parser.add_argument("--mongo_collection", "-c", help="mongo collection name", default="mails")
+    parser.add_argument("--workers", "-w", help="number of workers", default=cpu_count(), type=int)
     return parser.parse_args()
 
 
@@ -90,7 +91,7 @@ def print_worker(done_queue):
             pass
 
 
-def process_records(url, db, collection):
+def process_records(url, db, collection, num_workers=1):
     col = MongoClient(url)[db][collection]
     cursor = col.find({}, projection={'_id': True})
 
@@ -103,7 +104,7 @@ def process_records(url, db, collection):
 
     # Start worker processes
     worker_processes = []
-    for i in range(cpu_count()):
+    for i in range(num_workers):
         p = Process(target=worker, args=(url, db, collection, task_queue, print_queue))
         p.start()
         worker_processes.append(p)
@@ -116,7 +117,7 @@ def process_records(url, db, collection):
 
     # Tell child processes to stop
     logger.info("stopping workers via 'STOP' in queue")
-    for i in range(cpu_count()):
+    for i in range(num_workers):
         task_queue.put('STOP')
 
     logger.info("joining workers")
