@@ -132,4 +132,4 @@ def process_records(url, db, collection, num_workers=1):
 
 if __name__ == '__main__':
     args = parse_args()
-    process_records(args.mongo_url, args.mongo_db, args.mongo_collection)
+    process_records(args.mongo_url, args.mongo_db, args.mongo_collection, args.workers)
