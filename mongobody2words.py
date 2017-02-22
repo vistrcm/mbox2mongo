@@ -69,18 +69,17 @@ def process_body(body):
     # lower
     text = body.lower()
 
-    # # remove punctuation
-    # table = str.maketrans('', '', string.punctuation)
-    # text = text.translate(table)
-
-    # leave only printable symbols
-    # text = remove_unprintable(text)
+    # remove html at first
+    text = html2text.html2text(text)
 
     # clean some symbols. for example control
     text = text.translate(translate_table)
 
-    plain = html2text.html2text(text)
-    return plain
+    # split to words
+    words = text.split()
+    # filter digits
+    words = filter(lambda x: not x.isdigit(), words)
+    return words
 
 
 def remove_unprintable(input_body):
@@ -92,8 +91,8 @@ def worker(url, db, collection, task_queue, done_queue):
     worker_col = MongoClient(url)[db][collection]
     for item_id in iter(task_queue.get, 'STOP'):
         item = worker_col.find_one({"_id": item_id})
-        processed_text = process_body(item["body"])
-        for word in processed_text.split():
+        words = process_body(item["body"])
+        for word in words:
             done_queue.put(word)
 
 
