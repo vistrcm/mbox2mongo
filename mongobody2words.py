@@ -25,10 +25,8 @@ logger.addHandler(ch)
 # See http://www.unicode.org/reports/tr44/#General_Category_Values for unicode categories
 exclude_unicode_set = {
     'C',  # Other:	Cc | Cf | Cs | Co | Cn
-    'S',  # Symbol:	Sm | Sc | Sk | So
     'Zl',  # Line_Separator:	U+2028 LINE SEPARATOR only
-    'Zp',  # Paragraph_Separator:	U+2029 PARAGRAPH SEPARATOR only
-    'P'  # Punctuation:	Pc | Pd | Ps | Pe | Pi | Pf | Po
+    'Zp'  # Paragraph_Separator:	U+2029 PARAGRAPH SEPARATOR only
 }
 
 include_symbols = '@'  # keep this symbols
