@@ -50,6 +50,12 @@ exclude_chars = set(c for c in all_chars if unicodedata.category(c) in exclude_u
 translate_table = {ord(character): " " for character in exclude_chars}
 # replace "@" and "." and others by ``None`` to glue emails and urls
 translate_table.update({ord(character): None for character in include_symbols})
+hex_trans_table = {ord(char): None for char in '0123456789abcdefABCDEF'}
+
+
+def is_hex_number(s):
+    """using hex_trans_table try to identify if string is hex number or not"""
+    return s.translate(hex_trans_table) == ''
 
 
 def parse_args():
@@ -78,7 +84,7 @@ def process_body(body):
     # split to words
     words = text.split()
     # filter digits
-    words = filter(lambda x: not x.isdigit(), words)
+    words = filter(lambda x: not x.isdigit() and not is_hex_number(x), words)
     return words
 
 
