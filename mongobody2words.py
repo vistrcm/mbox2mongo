@@ -32,7 +32,7 @@ exclude_unicode_set = {
 include_symbols = '@'  # keep this symbols
 all_chars = set(chr(i) for i in range(sys.maxunicode))
 exclude_chars = set(c for c in all_chars if unicodedata.category(c) in exclude_unicode_set and c not in include_symbols)
-translate_table = {ord(character): None for character in exclude_chars}
+translate_table = {ord(character): " " for character in exclude_chars}
 
 
 def parse_args():
