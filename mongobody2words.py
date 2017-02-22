@@ -23,12 +23,17 @@ logger.addHandler(ch)
 
 # Prepare translation table to clean some non-important symbols.
 # See http://www.unicode.org/reports/tr44/#General_Category_Values for unicode categories
-exclude_unicode_set = set(
-    'C'  # Other:	Cc | Cf | Cs | Co | Cn
-)
+exclude_unicode_set = {
+    'C',  # Other:	Cc | Cf | Cs | Co | Cn
+    'S',  # Symbol:	Sm | Sc | Sk | So
+    'Zl',  # Line_Separator:	U+2028 LINE SEPARATOR only
+    'Zp',  # Paragraph_Separator:	U+2029 PARAGRAPH SEPARATOR only
+    'P'  # Punctuation:	Pc | Pd | Ps | Pe | Pi | Pf | Po
+}
 
+include_symbols = '@'  # keep this symbols
 all_chars = set(chr(i) for i in range(sys.maxunicode))
-exclude_chars = set(c for c in all_chars if unicodedata.category(c) in exclude_unicode_set)
+exclude_chars = set(c for c in all_chars if unicodedata.category(c) in exclude_unicode_set and c not in include_symbols)
 translate_table = {ord(character): None for character in exclude_chars}
 
 
