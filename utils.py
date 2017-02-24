@@ -45,6 +45,13 @@ def is_hex_number(s):
 
 
 def process_body(body):
+    """
+    Extract words from text body.
+
+    Remove unprintable characters, numbers, punctuation, etc. returns iterator over words in body.
+    :param body: text to parse
+    :return: iterator over words
+    """
     # lower
     text = body.lower()
 
