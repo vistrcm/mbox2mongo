@@ -7,16 +7,28 @@ from email.header import Header, decode_header
 
 from pymongo import MongoClient
 
+from utils import text_to_words
+
 
 def worker(mongo_collection, que):
     while True:
-        item = que.get()
-        if item is None:  # stop worker if got None
+        message = que.get()
+        if message is None:  # stop worker if got None
             break
         try:
-            mongo_collection.insert_one(item)
+
+            headers = {key: process_header(value) for key, value in message.items()}  # get message headers
+            body = walk_payload(message)  # get body
+            words = [word for word in text_to_words(body)]
+            db_record = {
+                "headers": headers,
+                "body": body,
+                "words": words
+            }
+
+            mongo_collection.insert_one(db_record)
         except Exception as ex:
-            sys.stderr.write("exception '%s' happened on writing to db item: %s\n" % (ex, item))
+            sys.stderr.write("exception '%s' happened on writing to db item: %s\n" % (ex, message))
         finally:
             que.task_done()
 
@@ -62,13 +74,7 @@ def process_header(header):
 
 def process_mbox(mbox, que):
     for message in mbox:
-        print("processing message {}".format(message["Message-ID"]))  # some kind of logging
-        db_record = {
-            "headers": {key: process_header(value) for key, value in message.items()},  # get message headers
-            "body": walk_payload(message)  # get body
-        }
-
-        que.put(db_record)
+        que.put(message)
 
 
 def main(mbox_path, mongo_url, db_name, db_collection, num_worker_threads):
