@@ -11,7 +11,7 @@ from multiprocessing import cpu_count
 
 from pymongo import MongoClient
 
-from utils import process_body
+from utils import text_to_words
 
 logger = logging.getLogger("body2words")
 logger.setLevel(logging.DEBUG)
@@ -38,7 +38,7 @@ def worker(url, db, collection, task_queue, done_queue):
     worker_col = MongoClient(url)[db][collection]
     for item_id in iter(task_queue.get, 'STOP'):
         item = worker_col.find_one({"_id": item_id})
-        words = process_body(item["body"])
+        words = text_to_words(item["body"])
         for word in words:
             done_queue.put(word)
 

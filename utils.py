@@ -44,7 +44,7 @@ def is_hex_number(s):
     return s.translate(hex_trans_table) == ''
 
 
-def process_body(body):
+def text_to_words(body):
     """
     Extract words from text body.
 
