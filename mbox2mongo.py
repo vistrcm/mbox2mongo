@@ -39,8 +39,11 @@ def walk_payload(message):
     if message.is_multipart():
         parts = []
         for part in message.walk():
-            maintype, _ = part.get_content_type().split('/')
-            if maintype == 'text':  # skip data with non 'text/*' context type
+            content_type = part.get_content_type()
+            content_disposition = part.get('Content-Disposition')
+
+            maintype, _ = content_type.split('/')
+            if maintype == 'text' and content_disposition is None:  # skip data with non 'text/*' context type
                 payload_str = try_decode(part)
                 parts.append(payload_str)
         return div.join(parts)
