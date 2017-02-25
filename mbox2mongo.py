@@ -16,7 +16,7 @@ def worker(mongo_collection, que):
         if message is None:  # stop worker if got None
             break
         try:
-
+            print("processing message {}".format(message["Message-ID"]))  # some kind of logging
             headers = {key: process_header(value) for key, value in message.items()}  # get message headers
             body = walk_payload(message)  # get body
             words = [word for word in text_to_words(body)]
