@@ -7,8 +7,6 @@ from email.header import Header, decode_header
 
 from pymongo import MongoClient
 
-from utils import text_to_words
-
 
 def worker(mongo_collection, que):
     while True:
