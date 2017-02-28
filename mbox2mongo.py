@@ -27,7 +27,7 @@ def worker(mongo_collection, que):
             if is_chat(message):  # skip "Chat" messages here.
                 continue
 
-            headers = {key: process_header(value) for key, value in message.items()}  # get message headers
+            headers = {key.lower(): process_header(value) for key, value in message.items()}  # get message headers
             body = walk_payload(message)  # get body
             db_record = {
                 "headers": headers,
