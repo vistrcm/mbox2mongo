@@ -8,6 +8,14 @@ from email.header import Header, decode_header
 from pymongo import MongoClient
 
 
+def is_chat(message):
+    """Check if Gmail message is chat message, not email.
+
+    Google/Hangout chats is shown in emails with label 'Chat'. Let's filter such messages."""
+    labels = message.get('X-Gmail-Labels', "").split(',')
+    return 'Chat' in labels
+
+
 def worker(mongo_collection, que):
     while True:
         message = que.get()
@@ -15,6 +23,10 @@ def worker(mongo_collection, que):
             break
         try:
             print("processing message {}".format(message["Message-ID"]))  # some kind of logging
+
+            if is_chat(message):  # skip "Chat" messages here.
+                continue
+
             headers = {key: process_header(value) for key, value in message.items()}  # get message headers
             body = walk_payload(message)  # get body
             db_record = {
