@@ -5,6 +5,7 @@ from __future__ import print_function
 import argparse
 import logging
 import sys
+from email import utils
 from multiprocessing import Process
 from multiprocessing import Queue
 from multiprocessing import cpu_count
@@ -38,9 +39,36 @@ def worker(url, db, collection, task_queue, done_queue):
     worker_col = MongoClient(url)[db][collection]
     for item_id in iter(task_queue.get, 'STOP'):
         item = worker_col.find_one({"_id": item_id})
-        words = text_to_words(item["body"])
+        words = process_item(item)["body_words"]
         for word in words:
             done_queue.put(word)
+
+
+def process_item(item):
+    # get from address
+    from_raw = item["headers"]["from"].lower()  # lower everything to simplify
+    from_name, from_email = utils.parseaddr(from_raw)
+
+    to_raw = item["headers"]["to"].lower()  # lower everything to simplify
+    to_addresses = utils.getaddresses([to_raw])  # to_raw folded in list to make getaddresses work
+    to_emails = [item(1) for item in to_addresses]
+
+    cc_raw = item["headers"]["cc"].lower()  # lower everything to simplify
+    cc_addresses = utils.getaddresses([cc_raw])  # cc_raw folded in list to make getaddresses work
+    cc_emails = [item(1) for item in cc_addresses]
+
+    # get words
+    words = text_to_words(item["body"])
+
+    # build result
+    res = {
+        "from_name": from_name,
+        "from_email": from_email,
+        "to_emails": to_emails,
+        "cc_emails": cc_emails,
+        "body_words": words
+    }
+    return res
 
 
 def print_worker(done_queue):
