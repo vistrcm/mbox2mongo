@@ -49,13 +49,8 @@ def process_item(item):
     from_raw = item["headers"]["from"].lower()  # lower everything to simplify
     from_name, from_email = utils.parseaddr(from_raw)
 
-    to_raw = item["headers"]["to"].lower()  # lower everything to simplify
-    to_addresses = utils.getaddresses([to_raw])  # to_raw folded in list to make getaddresses work
-    to_emails = [item(1) for item in to_addresses]
-
-    cc_raw = item["headers"]["cc"].lower()  # lower everything to simplify
-    cc_addresses = utils.getaddresses([cc_raw])  # cc_raw folded in list to make getaddresses work
-    cc_emails = [item(1) for item in cc_addresses]
+    to_emails = emails_from_header(item["headers"]["to"].lower())  # lower everything to simplify
+    cc_emails = emails_from_header(item["headers"]["cc"].lower())  # lower everything to simplify
 
     # get words
     words = text_to_words(item["body"])
@@ -69,6 +64,12 @@ def process_item(item):
         "body_words": words
     }
     return res
+
+
+def emails_from_header(raw_header):
+    addresses = utils.getaddresses([raw_header])  # raw_header folded in list to make getaddresses work
+    emails = [item(1) for item in addresses]  # skip name and use only email address
+    return emails
 
 
 def print_worker(done_queue):
