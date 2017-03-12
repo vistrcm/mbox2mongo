@@ -65,4 +65,4 @@ def text_to_words(body):
     words = text.split()
     # filter digits
     words = filter(lambda x: not x.isdigit() and not is_hex_number(x), words)
-    return words
+    return list(words)
