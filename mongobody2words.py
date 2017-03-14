@@ -128,7 +128,7 @@ def process_records(url, db, read_collection, write_collection, num_workers=1):
         p.join()
 
     logger.info("stopping writer via 'STOP_WRITING' in queue")
-    print_queue.put('STOP_WRITING')
+    write_queue.put('STOP_WRITING')
     logger.info("joining writer")
     write_process.join()
 
