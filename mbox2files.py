@@ -1,22 +1,54 @@
 import argparse
+import hashlib
 import mailbox
+import os
+from pathlib import Path
 
-from mbox import process_header, walk_payload
+from html2text import html2text
+
+from mbox import walk_payload, is_chat, process_header
 
 
-def process_message(message):
-    print("processing message {}".format(message["Message-ID"]))  # some kind of logging
+def message2file(datafile, text):
+    with open(datafile, 'w', encoding='utf-8') as data:
+        data.write(text)
+
+
+def meta2file(metafile, headers):
+    with open(metafile, 'w', encoding='utf-8') as meta:
+        for key, value in headers.items():
+            meta.write(f"{key}: {value}\n")
+
+
+def get_filenames(dst, mid):
+    """returns two files with different extensions (data, meta)"""
+    m = hashlib.md5(mid.encode('utf-8')).hexdigest()
+    data = f"{dst}/{m}.txt"
+    meta = f"{dst}/{m}.meta"
+    return data, meta
+
+
+def process_message(message, dst):
+    mid = message["Message-ID"]
+    print(f"processing message {mid}")  # some kind of logging
+
+    data, meta = get_filenames(dst, mid)
 
     headers = {key.lower(): process_header(value) for key, value in message.items()}  # get message headers
+    meta2file(meta, headers)
+
     body = walk_payload(message)  # get body
 
-    print(headers)
-    print(body)
+    plain_text = html2text(body)
+    message2file(data, plain_text)
 
 
-def process_mbox(mbox):
-    for message in mbox:
-        process_message(message)
+def process_mbox(mbox, dst):
+    for key, message in mbox.iteritems():
+        print(f"processing {key}")
+        if is_chat(message):  # skip "Chat" messages here.
+            continue
+        process_message(message, dst)
 
 
 def parse_args():
@@ -33,7 +65,8 @@ def parse_args():
 
 def main(mbox_path, dst, num_worker_threads):
     mbox = mailbox.mbox(mbox_path)
-    process_mbox(mbox)
+    os.makedirs(dst, exist_ok=True)
+    process_mbox(mbox, dst)
 
 
 if __name__ == '__main__':
