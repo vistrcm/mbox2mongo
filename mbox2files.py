@@ -3,8 +3,6 @@ import hashlib
 import mailbox
 import os
 
-from html2text import html2text
-
 from mbox import walk_payload, is_chat, process_header
 
 
@@ -43,9 +41,8 @@ def process_message(message, dst):
 
     body = walk_payload(message)  # get body
 
-    plain_text = html2text(body)
-    plain_text = plain_text.encode('utf-16', 'surrogatepass').decode('utf-16')  # some symbols cleanup
-    message2file(data, plain_text)
+    body = body.encode('utf-16', 'surrogatepass').decode('utf-16')  # some symbols cleanup
+    message2file(data, body)
 
 
 def process_mbox(mbox, dst):
