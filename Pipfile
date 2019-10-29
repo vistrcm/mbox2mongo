@@ -7,7 +7,6 @@ verify_ssl = true
 
 [packages]
 pymongo = "*"
-html2text = "*"
 
 [requires]
 python_version = "3.7"
