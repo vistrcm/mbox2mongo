@@ -31,6 +31,11 @@ def process_message(message, dst):
     mid = message["Message-ID"]
     print(f"processing message {mid}")  # some kind of logging
 
+    # handle messages without message-ID
+    if mid is None:
+        mid = "-".join([message["From"], message["To"], message["Subject"]])
+        print(f"message-id is None, using {mid}")
+
     data, meta = get_filenames(dst, mid)
 
     headers = {key.lower(): process_header(value) for key, value in message.items()}  # get message headers
