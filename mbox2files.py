@@ -44,7 +44,7 @@ def process_message(message, dst):
     body = walk_payload(message)  # get body
 
     plain_text = html2text(body)
-    plain_text = plain_text.encode('utf-16','surrogatepass').decode('utf-16')  # some symbols cleanup
+    plain_text = plain_text.encode('utf-16', 'surrogatepass').decode('utf-16')  # some symbols cleanup
     message2file(data, plain_text)
 
 
