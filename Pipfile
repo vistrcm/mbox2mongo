@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 pymongo = "*"
 html2text = "*"
+snakeviz = "*"
 
 [requires]
 python_version = "3.7"
