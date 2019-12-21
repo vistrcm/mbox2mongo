@@ -61,11 +61,10 @@ def parse_args():
     )
     parser.add_argument("mbox_path", help="path to mailbox file")
     parser.add_argument("dst", help="destination folder")
-    parser.add_argument("--workers", "-w", help="number of workers", default=3, type=int)
     return parser.parse_args()
 
 
-def main(mbox_path, dst, num_worker_threads):
+def main(mbox_path, dst):
     mbox = mailbox.mbox(mbox_path)
     os.makedirs(dst, exist_ok=True)
     process_mbox(mbox, dst)
@@ -73,4 +72,4 @@ def main(mbox_path, dst, num_worker_threads):
 
 if __name__ == '__main__':
     args = parse_args()
-    main(args.mbox_path, args.dst, args.workers)
+    main(args.mbox_path, args.dst)
