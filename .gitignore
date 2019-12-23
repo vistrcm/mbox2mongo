@@ -4,3 +4,4 @@ test.mbox
 venv/
 mongodb_data/
 __pycache__/
+data/
