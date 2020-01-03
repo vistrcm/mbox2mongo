@@ -41,7 +41,7 @@ def process_message(message, dst):
 
     body = walk_payload(message)  # get body
 
-    body = body.encode('utf-16', 'surrogatepass').decode('utf-16')  # some symbols cleanup
+    body = body.encode('utf-8', 'surrogateescape').decode('utf-8')  # some symbols cleanup
     message2file(data, body)
 
 
