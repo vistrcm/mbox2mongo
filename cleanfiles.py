@@ -1,16 +1,28 @@
 import argparse
 import concurrent.futures
 import os
+import re
 
 import html2text 
 
 
+def preprocess_text(text):
+    # windows like
+    text = re.sub(r"\r\n", "\n", text)
+    # durty hack to replace \n with <br> to fool html2text
+    text = re.sub(r"\n", "<br>", text)
+
+    return text
+
 def process_file(src, dst):
     with open(src, 'r') as src_file:
         content = src_file.read()
-        text = html2text.html2text(content)
+        content = preprocess_text(content)
+        text = html2text.html2text(content, bodywidth=0)
+        # clean strange symbols
+        text  = text.encode('utf8','replace').decode('utf8','replace')
 
-    with open(dst, "w") as dst_file:
+    with open(dst, "w", encoding="utf8") as dst_file:
         dst_file.write(text)
 
     return f"{src} -> {dst}"
