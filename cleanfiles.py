@@ -32,12 +32,17 @@ def main():
     
     os.makedirs(args.dst, exist_ok=True)  # need to make sure dst exists
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = []
+        futures = {}
         for src_file, dst_file in get_files(args.src, args.dst):
-            futures.append(executor.submit(process_file, src_file, dst_file))
+            futures[executor.submit(process_file, src_file, dst_file)] = (src_file, dst_file)
         for future in concurrent.futures.as_completed(futures):
-            rst = future.result()
-            print(rst)
+            try:
+                rst = future.result()
+                print(rst)
+            except UnicodeEncodeError as ex:
+                print(f"got exception processing {futures[future][0]}")
+                print(ex)
+                raise ex
     
     
 if __name__ == "__main__":
