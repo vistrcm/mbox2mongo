@@ -20,7 +20,7 @@ def process_file(src, dst):
 
         # no need to process empty content
         if len(content) == 0:
-            return f"{src} -x-> {dst}"
+            return f"{src} -X {dst}"
 
         content = preprocess_text(content)
         text = html2text.html2text(content, bodywidth=0)
