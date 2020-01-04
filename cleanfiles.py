@@ -17,6 +17,11 @@ def preprocess_text(text):
 def process_file(src, dst):
     with open(src, 'r') as src_file:
         content = src_file.read()
+
+        # no need to process empty content
+        if len(contenet) == 0:
+            return f"{src} -x-> {dst}"
+
         content = preprocess_text(content)
         text = html2text.html2text(content, bodywidth=0)
         # clean strange symbols
