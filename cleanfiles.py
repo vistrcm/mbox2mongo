@@ -19,7 +19,7 @@ def process_file(src, dst):
         content = src_file.read()
 
         # no need to process empty content
-        if len(contenet) == 0:
+        if len(content) == 0:
             return f"{src} -x-> {dst}"
 
         content = preprocess_text(content)
