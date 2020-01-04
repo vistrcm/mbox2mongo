@@ -3,7 +3,7 @@ import concurrent.futures
 import os
 import re
 
-import html2text 
+import html2text
 
 
 def preprocess_text(text):
@@ -41,7 +41,7 @@ def main():
     parser.add_argument("src", type=str, help="src dir")
     parser.add_argument("dst", type=str, help="dst dir")
     args = parser.parse_args()
-    
+
     os.makedirs(args.dst, exist_ok=True)  # need to make sure dst exists
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = {}
@@ -55,8 +55,6 @@ def main():
                 print(f"got exception processing {futures[future][0]}")
                 print(ex)
                 raise ex
-    
-    
+
 if __name__ == "__main__":
 	main()
-    
