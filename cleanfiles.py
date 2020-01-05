@@ -19,7 +19,7 @@ def process_file(src, dst):
         content = src_file.read()
 
         # no need to process empty content
-        if len(content) == 0:
+        if content.isspace():
             return f"{src} -X {dst}"
 
         content = preprocess_text(content)
