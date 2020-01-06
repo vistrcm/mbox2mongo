@@ -27,6 +27,10 @@ def process_file(src, dst):
         # clean strange symbols
         text  = text.encode('utf8','replace').decode('utf8','replace')
 
+        # no need to save empty text
+        if len(text) ==0 or text.isspace():
+            return f"{src} XX {dst}"
+
     with open(dst, "w", encoding="utf8") as dst_file:
         dst_file.write(text)
 
