@@ -1,10 +1,19 @@
 import argparse
+import collections
 import concurrent.futures
 import os
 import re
+import hashlib
 
 import html2text
 
+# durty hack with global variable. may be not safe and no guarantee
+seen_hashes = collections.defaultdict(list)
+
+def md5(text: str):
+    h = hashlib.md5()
+    h.update(text.encode("utf8"))
+    return h.hexdigest()
 
 def preprocess_text(text):
     # windows like
@@ -24,12 +33,20 @@ def process_file(src, dst):
 
         content = preprocess_text(content)
         text = html2text.html2text(content, bodywidth=0)
+        # remove spaces at the beginning and the end
+        text = text.strip()
+
         # clean strange symbols
         text  = text.encode('utf8','replace').decode('utf8','replace')
 
         # no need to save empty text
         if len(text) ==0 or text.isspace():
             return f"{src} XX {dst}"
+        # check for seen hashes
+        h = md5(text)
+        if h in seen_hashes:
+            return f"{src} -Y {dst}: {seen_hashes[h]}"
+        seen_hashes[h].append(src)
 
     with open(dst, "w", encoding="utf8") as dst_file:
         dst_file.write(text)
