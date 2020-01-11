@@ -12,3 +12,6 @@ do
     cat ${SRC} | sed '/^>/d' | sed '/^|/d' | sed '/^$/d' | sed '/^[[:blank:]].*$/d' > ${DST}
 done
 
+# clean empty files
+find ${DST_DIR}/ -type f -size 0 -exec rm {} \;
+
