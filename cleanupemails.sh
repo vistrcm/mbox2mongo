@@ -9,7 +9,7 @@ for FILE in `ls ${SRC_DIR}`
 do
     SRC=${SRC_DIR}/${FILE}
     DST=${DST_DIR}/${FILE}
-    cat ${SRC} | sed '/^>/d' | sed '/^|/d' | sed '/^$/d' | sed '/^[[:blank:]].*$/d' > ${DST}
+    cat ${SRC} | sed '/^>/d' | sed '/^|/d' | sed '/^$/d' | sed '/^[[:blank:]].*$/d' | sed '/[a-zA-Z].*/!d' > ${DST}
 done
 
 # clean empty files
