@@ -15,3 +15,5 @@ done
 # clean empty files
 find ${DST_DIR}/ -type f -size 0 -exec rm {} \;
 
+# cleanup duplicates if any
+fdupes -d -N ${DST_DIR}
